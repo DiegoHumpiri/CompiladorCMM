@@ -1,0 +1,22 @@
+funcion vacio principal() {
+    si( 4 > 9 ) {
+        i=i;
+      
+    } 
+        mientras(falso) {
+            decimal dec = 100.01;
+        }
+    
+    boleano semaforo = falso;
+
+    para( entero i=3; verdadero; i = i + 1){
+        i = i - 1;
+    }
+
+    a = expe(2,4);
+}
+
+funcion entero imprimir(cadena c){
+    ar = 1;
+    retornar 1;
+}

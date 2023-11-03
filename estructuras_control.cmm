@@ -1,0 +1,13 @@
+funcion vacio principal() {
+    si( 4 > 9 ) {
+        i=i;
+      
+    } 
+        mientras(falso) {
+            decimal dec = 100.01;
+        }
+    
+    boleano semaforo = falso;
+
+    
+}

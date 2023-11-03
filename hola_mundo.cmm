@@ -1,0 +1,5 @@
+funcion vacio principal() {
+    si( verdadero ){
+        imprimir("hola");
+    }
+}

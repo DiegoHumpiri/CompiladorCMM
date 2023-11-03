@@ -1,0 +1,12 @@
+funcion vacio principal() {
+    si(a > 4) {
+        a = 1 + a;
+        a = a + 1;
+    } 
+    a = verdadero;
+    sino {
+        mientras(verdadero) {
+            decimal dec = 100;
+        }
+    }
+}
