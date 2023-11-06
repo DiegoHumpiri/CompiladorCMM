@@ -391,6 +391,11 @@ def registrarParametros(tree, tabla, ambito):
       return temp
   return None
 
+#def analizadorScope(tree, tabla):
+#def buscarEnTablaSimbolo(tree):
+#def eliminarSimbolo(tree):
+
+ 
 registrarVariables(root, tablaSimbolos, "global")     
 registrarParametros(root, tablaSimbolos, "global")     
 
