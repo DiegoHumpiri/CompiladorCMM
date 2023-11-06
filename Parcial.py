@@ -298,7 +298,107 @@ if( len(stack) == 0 ):
     treeToGraphviz(root, None)
     graphvizText = graphvizText +  "} "
 
-    #print(graphvizText)
+    print(graphvizText)
+
+############################################
+#    Analizador Semántico del lenguaje C--
+############################################
+
+class NodoTablaSimbolo():
+  def __init__(self, tipo_dato, identificador, ambito, tipo_identificador):
+    self.tipo_dato = tipo_dato
+    self.identificador = identificador
+    self.ambito = ambito
+    self.tipo_identificador = tipo_identificador
+
+tablaSimbolos = []
+
+def imprimirTablaSimbolos(tabla):
+  print(f'{"Tipo dato":<15}{"Identificador":<20}{"ambito":<20}{"tipo_identificador"}')
+  for node in tabla: 
+    print(f'{node.tipo_dato:<15}{node.identificador:<20}{node.ambito:<20}{node.tipo_identificador}')
+
+# Parte I registrar funciones
+
+def registrarFunciones(tree, tabla): 
+  if(tree.node.token.type == "funcion"):
+    #print("Nombre funcion: " + str(tree.node.id))
+    #print("Nombre funcion: " + str(tree.children[10].children[0].node.token.type))
+    #print("Nombre funcion: " + str(tree.children[9].node.token.lexeme))
+    nodo = NodoTablaSimbolo(tree.children[10].children[0].node.token.type, tree.children[9].node.token.lexeme, "global", "f") # f->funcion o v->variable
+    tabla.append(nodo)
+  for child in tree.children:
+    temp = registrarFunciones(child, tabla)
+    if temp != None:
+      return temp
+  return None
+
+registrarFunciones(root, tablaSimbolos)
+
+def registrarVariables(tree, tabla, ambito):
+  if(tree.node.token.type == "funcion"):
+     ambito = tree.children[9].node.token.lexeme
+  if(tree.node.token.type == "creacion_variable"):
+    #print("Ambito: " + ambito)
+    #print("Nombre variable: " + str(tree.node.id))
+    #print("Nombre variable: " + str(tree.children[2].children[0].node.token.type))
+    #print("Nombre variable: " + str(tree.children[1].node.token.lexeme))
+    nodo = NodoTablaSimbolo(tree.children[2].children[0].node.token.type, tree.children[1].node.token.lexeme, ambito, "v") # f->funcion o v->variable
+    tabla.append(nodo)
+  for child in tree.children:
+    temp = registrarVariables(child, tabla, ambito)
+    if temp != None:
+      return temp
+  return None
+
+def registrarParametros(tree, tabla, ambito):
+  if(tree.node.token.type == "funcion"):
+     ambito = tree.children[9].node.token.lexeme
+  if(tree.node.token.type == "parametros"):
+     print( str( tree.node.id ) + " " + tree.node.token.type )
+     #print("Ambito: " + ambito)
+     if(tree.children[0].node.token.type == 'e'):
+        print( "Nodo e: No tiene parametros" )
+     else:
+        print( "Tiene parametros" )
+        parametro = tree.children[1]
+        parametros_ = tree.children[0]
+        print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+        print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
+        print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
+        print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
+        print()
+
+        nodo = NodoTablaSimbolo(parametro.children[1].children[0].node.token.type, parametro.children[0].node.token.lexeme, ambito, "v")
+        tabla.append(nodo)
+
+        while parametros_.children[0].node.token.type != 'e':
+          parametro = parametros_.children[1]
+          parametros_ = parametros_.children[0]
+          print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+          print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
+          print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+          print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
+          print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
+          print()
+
+          nodo = NodoTablaSimbolo(parametro.children[1].children[0].node.token.type, parametro.children[0].node.token.lexeme, ambito, "v")
+          tabla.append(nodo)
+      
+  for child in tree.children:
+    temp = registrarParametros(child, tabla, ambito)
+    if temp != None:
+      return temp
+  return None
+
+registrarVariables(root, tablaSimbolos, "global")     
+registrarParametros(root, tablaSimbolos, "global")     
+
+imprimirTablaSimbolos(tablaSimbolos)
+
+
+
+
 
 
 '''
