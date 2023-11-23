@@ -298,7 +298,7 @@ if( len(stack) == 0 ):
     treeToGraphviz(root, None)
     graphvizText = graphvizText +  "} "
 
-    print(graphvizText)
+#    print(graphvizText)
 
 ############################################
 #    Analizador Semántico del lenguaje C--
@@ -546,6 +546,21 @@ def reservarMemoriaVariables( tree ):
 
 reservarMemoriaVariables( root )
 
+terminales = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
+    'NUMERO_DECIMAL', 'PARENTESIS_DER', 'PARENTESIS_IZQ', 'LLAVES_DER', 'IDENTIFICADOR',
+    'LITERAL_CADENA', 'LITERAL_CARACTER', 'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', }
+
+def recorrerExpresion( nodoExpresion ):
+
+   for child in reversed(nodoExpresion.children):
+      recorrerExpresion(child)
+#    if temp != None:
+#      return temp
+   if nodoExpresion.node.token.type in terminales:
+      print( str(nodoExpresion.node.id) + " " + nodoExpresion.node.token.type + " : " +  str( nodoExpresion.node.token.lexeme )) 
+
+recorrerExpresion( buscarNodeTree(66, root) )
+
 codigoGenerado = codigoGenerado + ".text \nmain:\n"
 
-print(codigoGenerado)
+#print(codigoGenerado)
