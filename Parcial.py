@@ -175,7 +175,7 @@ def imprimirTokensLL1( listaTokens ):
 #imprimirTokensLL1(inputTokens)
 
 ############################################
-#    Analizador sintactico del lenguaje C--
+#    Analizador sintáctico del lenguaje C--
 ############################################
 class node_stack:
   def __init__(self, token):
@@ -360,14 +360,14 @@ def registrarParametros(tree, tabla, ambito):
      if(tree.children[0].node.token.type == 'e'):
         print( "Nodo e: No tiene parametros" )
      else:
-        print( "Tiene parametros" )
+        #print( "Tiene parametros" )
         parametro = tree.children[1]
         parametros_ = tree.children[0]
-        print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
-        print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
-        print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
-        print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
-        print()
+        #print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+        #print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
+        #print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
+        #print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
+        #print()
 
         nodo = NodoTablaSimbolo(parametro.children[1].children[0].node.token.type, parametro.children[0].node.token.lexeme, ambito, "v")
         tabla.append(nodo)
@@ -375,12 +375,12 @@ def registrarParametros(tree, tabla, ambito):
         while parametros_.children[0].node.token.type != 'e':
           parametro = parametros_.children[1]
           parametros_ = parametros_.children[0]
-          print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
-          print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
-          print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
-          print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
-          print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
-          print()
+          #print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+          #print( "Parametro_: " + str(parametros_.node.id) + " " + parametros_.node.token.type )
+          #print( "Parametro: " + str(parametro.node.id) + " " + parametro.node.token.type )
+          #print( "Parametro tipo: " + str(parametro.children[1].node.id) + " " + str(parametro.children[1].children[0].node.token.type) )
+          #print( "Parametro identificador: " + str(parametro.children[0].node.id) + " " + str(parametro.children[0].node.token.lexeme) )
+          #print()
 
           nodo = NodoTablaSimbolo(parametro.children[1].children[0].node.token.type, parametro.children[0].node.token.lexeme, ambito, "v")
           tabla.append(nodo)
@@ -396,17 +396,156 @@ def registrarParametros(tree, tabla, ambito):
 #def eliminarSimbolo(tree):
 
  
-registrarVariables(root, tablaSimbolos, "global")     
-registrarParametros(root, tablaSimbolos, "global")     
+#registrarVariables(root, tablaSimbolos, "global")     
+#registrarParametros(root, tablaSimbolos, "global")     
 
-imprimirTablaSimbolos(tablaSimbolos)
-
-
+#imprimirTablaSimbolos(tablaSimbolos)
 
 
+''''
+    'vacio'     : 'VACIO',
+    'boleano'   : 'BOLEANO',
+    'entero'    : 'ENTERO',
+    'decimal'   : 'DECIMAL',
+    'caracter'  : 'CARACTER',
+    'cadena'    : 'CADENA',
+    'verdadero' : 'VERDADERO',
+    'falso'     : 'FALSO'
+'''
 
+# recibe un NodeTree type: expresion 
+def typeCheckerExpresion(expresion):
+   return
+
+def esOperacionBinaria(expresion):
+   if len(expresion.children[0].children) == 1 and len(expresion.children[1].children[0].children) == 1:
+      return False
+   return True
+
+# recibe factor: expresion minima 
+def factorTypeChecker(factor):
+   if esBoleano(factor):
+      return 'BOLEANO'
+   if esEntero(factor):
+      return 'ENTERO'
+   if esDecimal(factor):
+      return 'DECIMAL'
+   if esCaracter(factor):
+      return 'CARACTER'
+   if esCadena(factor):
+      return 'CADENA'
+   return 'DESCONOCIDO'
+
+def esBoleano(factor):   
+   if factor.children[0].node.token.type == "VERDADERO":
+      return True
+   if factor.children[0].node.token.type == "FALSO":
+      return True
+   return False
+
+def esEntero(factor):
+   if factor.children[0].node.token.type == "NUMERO_ENTERO":
+      return True
+   return False
+
+def esDecimal(factor):
+   if factor.children[0].node.token.type == "NUMERO_DECIMAL":
+      return True
+   return False
+
+def esCaracter(factor):
+   if factor.children[0].node.token.type == "LITERAL_CARACTER":
+      return True
+   return False
+
+def esCadena(factor):
+   if factor.children[0].node.token.type == "LITERAL_CADENA":
+      return True
+   return False
+
+def checkExpresionBinaria(nodoExpresion):
+   if len(nodoExpresion.children[0].children) == 1 and len(nodoExpresion.children[1].children[0].children) == 1:
+      return
+
+def check_termino(nodoTermino):
+   if len(nodoTermino.children[0].childre) == 1:
+      return factorTypeChecker(nodoTermino.children[1])
+   else :
+      return  
+
+def check_expresion_(expresion_):
+   if len(expresion_.children[0].children) == 1:
+      return [ expresion_.children[2].node.token.type,  ]
+   
+def getTiposPorOperador(operador):
+   if operador == 'SUMA':
+      return ['ENTERO', 'DECIMAL', 'CADENA']
+   elif operador == 'RESTA':
+      return ['ENTERO', 'DECIMAL']
+   elif operador == "MULTIPLICACION":
+      return ['ENTERO', 'DECIMAL']
+   elif operador == "DIVISION":
+      return ['ENTERO', 'DECIMAL']
+   elif operador == 'CONJUNCION':
+      return ['BOLEANO']
+   elif operador == 'DISYUNCION':
+      return ['BOLEANO']
+   elif operador == 'IGUAL':
+      return ['ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'BOLEANO']
+   elif operador == 'DIFERENTE':
+      return ['ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'BOLEANO']
+   elif operador == 'MENOR_IGUAL_QUE':
+      return ['ENTERO', 'DECIMAL']
+   elif operador == 'MENOR_QUE':
+      return ['ENTERO', 'DECIMAL']
+   elif operador == 'MAYOR_IGUAL_QUE':
+      return ['ENTERO', 'DECIMAL']
+   elif operador == 'MAYOR_QUE':
+      return ['ENTERO', 'DECIMAL']
+
+
+#nodeTest = buscarNodeTree(20, root)
+#print(nodeTest.node.token.type)
+#print(esOperacionBinaria(nodeTest))
+#print(esBoleano(nodeTest))
+#print(esEntero(nodeTest))
+#print(esDecimal(nodeTest))
+#print(esCaracter(nodeTest))
+#print(esCadena(nodeTest))
+
+##############################################################
+######  Assembly MIPS 
+##############################################################
 
 '''
-helpful
-https://cs.stackexchange.com/questions/4862/left-factoring-a-grammar-into-ll1
+def buscarNodeTree(id, tree):
+  if id == tree.node.id:
+    return tree
+  for child in tree.children:
+    temp = buscarNodeTree(id, child)
+    if temp != None:
+      return temp
+  return None
 '''
+codigoGenerado = "#Codigo ensamblador:\n .data \n"
+
+def reservarMemoriaVariables( tree ):
+    if tree.node.token.type == "creacion_variable":
+       if tree.children[2].children[0].node.token.type == "ENTERO":
+         global codigoGenerado
+         codigoGenerado = codigoGenerado + "# Creacion de variable "
+         codigoGenerado = codigoGenerado + tree.children[2].children[0].node.token.lexeme
+         codigoGenerado = codigoGenerado + " " + tree.children[1].node.token.lexeme
+         codigoGenerado = codigoGenerado + "\nvar_" + tree.children[1].node.token.lexeme
+         codigoGenerado = codigoGenerado + ":\t\t.word\t0:1\n"
+    for child in tree.children:
+       temp = reservarMemoriaVariables( child )
+       if temp != None:
+          return temp
+    return None
+
+reservarMemoriaVariables( root )
+
+codigoGenerado = codigoGenerado + ".text \nmain:\n"
+
+print(codigoGenerado)

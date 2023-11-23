@@ -1,13 +1,8 @@
 funcion vacio principal() {
-    decimal a = expe(2,4);
-}
+    entero x;
+    entero y;
+    entero z = 1;
 
-funcion entero imprimir(cadena c, entero d, decimal e){
-    entero ar = 1;
-    retornar 1;
-}
-
-funcion entero imprimir(){
-    entero ar = 1;
-    retornar 1;
+    x = 5;
+    y = x + 5;
 }
