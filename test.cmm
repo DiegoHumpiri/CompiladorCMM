@@ -1,8 +1,9 @@
 funcion vacio principal() {
-    entero x;
-    entero y;
-    entero z = 1;
+    entero z = 0;
+    entero x = 0;
+    entero y = 1;
 
-    x = 5;
+    x = 1 + 2;
     y = (a+b)*(c+d) ;
+    z = (1+4)+(10+5) ;
 }
