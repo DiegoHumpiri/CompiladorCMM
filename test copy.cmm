@@ -4,5 +4,5 @@ funcion vacio principal() {
     entero z = 1;
 
     x = 5;
-    y = (a+b)*(c+d) ;
+    y = x + 5;
 }

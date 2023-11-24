@@ -550,6 +550,8 @@ terminales = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 
     'NUMERO_DECIMAL', 'PARENTESIS_DER', 'PARENTESIS_IZQ', 'LLAVES_DER', 'IDENTIFICADOR',
     'LITERAL_CADENA', 'LITERAL_CARACTER', 'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', }
 
+expresionFormula = []
+
 def recorrerExpresion( nodoExpresion ):
 
    for child in reversed(nodoExpresion.children):
@@ -557,9 +559,107 @@ def recorrerExpresion( nodoExpresion ):
 #    if temp != None:
 #      return temp
    if nodoExpresion.node.token.type in terminales:
-      print( str(nodoExpresion.node.id) + " " + nodoExpresion.node.token.type + " : " +  str( nodoExpresion.node.token.lexeme )) 
+      #print( str(nodoExpresion.node.id) + " " + nodoExpresion.node.token.type + " : " +  str( nodoExpresion.node.token.lexeme )) 
+      global expresionFormula
+      expresionFormula.append(nodoExpresion.node)
+
+
+def printExpresionFormula( expresion ):
+   for i in expresion:
+      print( str(i.id) + " " + i.token.type + " : " +  str( i.token.lexeme ))
 
 recorrerExpresion( buscarNodeTree(66, root) )
+
+printExpresionFormula(expresionFormula)
+
+operando = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
+    'NUMERO_DECIMAL', 'IDENTIFICADOR', 'LITERAL_CADENA', 'LITERAL_CARACTER' }
+operadores = { 'MULTIPLICACION', 'DIVISION', 'SUMA', 'RESTA', 'PARENTESIS_DER', 'PARENTESIS_IZQ' }
+operadoresPrecedencia = [ ('MULTIPLICACION',3), ('DIVISION',3), ('SUMA',2), ('RESTA',2), 
+                          ('PARENTESIS_IZQ',1), ('PARENTESIS_DER',1) ]
+
+pilaOperadores = []
+expresionPolaca = []
+
+def convertirNocionPolaca( expresionFormula ):
+   global expresionPolaca
+   for token in expresionFormula:
+      if token.token.type in operando:
+         expresionPolaca.append( token )
+      
+      elif token.token.type == 'PARENTESIS_IZQ':
+         pilaOperadores.append(token)
+         
+      elif token.token.type == 'PARENTESIS_DER':
+         while True:
+            tokenTemp = pilaOperadores.pop()            
+            if tokenTemp.token.type == 'PARENTESIS_IZQ':
+               break
+            else:
+               expresionPolaca.append(tokenTemp)
+               
+      elif token.token.type in operadores:
+         while not len(pilaOperadores) == 0:
+            precedencia = [i for i in operadoresPrecedencia if token.token.type in i]
+            precedenciaPila = [i for i in operadoresPrecedencia if pilaOperadores[-1].token.type in i]
+            if precedenciaPila[0][1] >= precedencia[0][1]:
+               expresionPolaca.append( pilaOperadores.pop() )
+            else:
+               break
+
+         pilaOperadores.append(token)
+   while not len(pilaOperadores) == 0:
+      expresionPolaca.append(pilaOperadores.pop())
+
+convertirNocionPolaca(expresionFormula)
+print()
+printExpresionFormula(expresionPolaca)
+
+constantes = { 'NUMERO_ENTERO' }
+variables = { 'IDENTIFICADOR' }
+
+def expresionPolacaAssembly(expresionPolaca):
+   global constantes
+   global variables
+   global operadores
+   global codigoGenerado
+   acumuladorEnUso = False
+   pilaOperandosCode = []
+   for token in expresionPolaca:
+      if token.token.type in constantes:
+         codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
+         codigoGenerado = codigoGenerado + token.token.lexeme + "\n"
+         codigoGenerado = codigoGenerado + "li $s0, " + token.token.lexeme + "\n"
+         codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
+         codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
+      elif token.token.type in variables:
+         codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
+         codigoGenerado = codigoGenerado + token.token.lexeme + "\n"
+         codigoGenerado = codigoGenerado + "la $t0, var_" + token.token.lexeme + "\n"
+         codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
+         codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
+         codigoGenerado = codigoGenerado + "addiu $sp $sp -4\n\t# Hacemos push"
+      elif token.token.type in operadores:
+         if token.token.type == 'SUMA':
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para sumar: \n" 
+            codigoGenerado = codigoGenerado + "lw $a0, 4($sp) \n"
+            codigoGenerado = codigoGenerado + "addiu $sp $sp 4 # Cargamos primer operando en acc\n"
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "add $a0, $a0, $t1\n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+         
+         if token.token.type == 'RESTA':
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para sumar: \n" 
+            codigoGenerado = codigoGenerado + "lw $a0, 4($sp) \n"
+            codigoGenerado = codigoGenerado + "addiu $sp $sp 4 # Cargamos primer operando en acc\n"
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "sub $a0, $a0, $t1\n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+         
+         
+
+
+
 
 codigoGenerado = codigoGenerado + ".text \nmain:\n"
 
