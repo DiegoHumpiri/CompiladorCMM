@@ -624,43 +624,64 @@ def expresionPolacaAssembly(expresionPolaca):
    global operadores
    global codigoGenerado
    acumuladorEnUso = False
+   primerOperando = True
    pilaOperandosCode = []
    for token in expresionPolaca:
-      if token.token.type in constantes:
-         codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
-         codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
-         codigoGenerado = codigoGenerado + "li $a0, " + str(token.token.lexeme) + "\n"
-         codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
-         codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
+      if token.token.type in constantes:         
+         if primerOperando == True:
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
+            codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "li $a0, " + str(token.token.lexeme) + "\n"
+            primerOperando = False
+         else:
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
+            codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
+            codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
+            codigoGenerado = codigoGenerado + "li $a0, " + str(token.token.lexeme) + "\n"
       elif token.token.type in variables:
-         codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
-         codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
-         codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
-         codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
-         codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
-         codigoGenerado = codigoGenerado + "addiu $sp $sp -4\n\t# Hacemos push"
+         if primerOperando == True:
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
+            codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
+            primerOperando = False
+         else:
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
+            codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
+            codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
+            codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
+
       elif token.token.type in operadores:
          if token.token.type == 'SUMA':
             codigoGenerado = codigoGenerado + "\n#Codigo generado para sumar: \n" 
-            codigoGenerado = codigoGenerado + "lw $a0, 4($sp) \n"
-            codigoGenerado = codigoGenerado + "addiu $sp $sp 4 # Cargamos primer operando en acc\n"
+            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "add $a0, $a0, $t1\n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
-
-            codigoGenerado = codigoGenerado + "sw $a0, 0($sp)\n"
-            codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
-
          
          if token.token.type == 'RESTA':
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para sumar: \n" 
-            codigoGenerado = codigoGenerado + "lw $a0, 4($sp) \n"
-            codigoGenerado = codigoGenerado + "addiu $sp $sp 4 # Cargamos primer operando en acc\n"
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para restar: \n" 
+            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
-            codigoGenerado = codigoGenerado + "sub $a0, $a0, $t1\n"
+            codigoGenerado = codigoGenerado + "sub $a0, $t1, $a0 \n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
 
-      
+         if token.token.type == 'MULTIPLICACION':
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para multiplicar: \n" 
+            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "mul $a0, $t1, $a0 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'DIVISION':
+            codigoGenerado = codigoGenerado + "\n#Codigo generado para dividir: \n" 
+            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "div $a0, $t1, $a0 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
          
 print()
 print()
