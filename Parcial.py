@@ -301,7 +301,7 @@ if( len(stack) == 0 ):
     print(graphvizText)
 
 ############################################
-#    Analizador Semántico del lenguaje C--
+#    Analizador Semántico del lenguaje C--  
 ############################################
 
 class NodoTablaSimbolo():
@@ -513,8 +513,9 @@ def getTiposPorOperador(operador):
 #print(esCaracter(nodeTest))
 #print(esCadena(nodeTest))
 
+print()
 ##############################################################
-######  Assembly MIPS 
+###### Generador de Código Assembly MIPS 
 ##############################################################
 
 '''
@@ -527,7 +528,7 @@ def buscarNodeTree(id, tree):
       return temp
   return None
 '''
-codigoGenerado = "#Codigo ensamblador:\n .data \n"
+codigoGenerado = "# Codigo ensamblador:\n .data \n"
 
 def reservarMemoriaVariables( tree ):
     if tree.node.token.type == "creacion_variable":
@@ -568,12 +569,12 @@ def printExpresionFormula( expresion ):
    for i in expresion:
       print( str(i.id) + " " + i.token.type + " : " +  str( i.token.lexeme ))
 
-recorrerExpresion( buscarNodeTree(150, root) )
+#recorrerExpresion( buscarNodeTree(26, root) )
 
-printExpresionFormula(expresionFormula)
+#printExpresionFormula(expresionFormula)
 
 operando = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
-    'NUMERO_DECIMAL', 'IDENTIFICADOR', 'LITERAL_CADENA', 'LITERAL_CARACTER' }
+             'NUMERO_DECIMAL', 'IDENTIFICADOR', 'LITERAL_CADENA', 'LITERAL_CARACTER' }
 operadores = { 'MULTIPLICACION', 'DIVISION', 'SUMA', 'RESTA', 'PARENTESIS_DER', 'PARENTESIS_IZQ' }
 operadoresPrecedencia = [ ('MULTIPLICACION',3), ('DIVISION',3), ('SUMA',2), ('RESTA',2), 
                           ('PARENTESIS_IZQ',1), ('PARENTESIS_DER',1) ]
@@ -611,9 +612,9 @@ def convertirNotacionPolaca( expresionFormula ):
    while not len(pilaOperadores) == 0:
       expresionPolaca.append(pilaOperadores.pop())
 
-convertirNotacionPolaca(expresionFormula)
+#convertirNotacionPolaca(expresionFormula)
 print()
-printExpresionFormula(expresionPolaca)
+#printExpresionFormula(expresionPolaca)
 
 constantes = { 'NUMERO_ENTERO' }
 variables = { 'IDENTIFICADOR' }
@@ -629,25 +630,25 @@ def expresionPolacaAssembly(expresionPolaca):
    for token in expresionPolaca:
       if token.token.type in constantes:         
          if primerOperando == True:
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para una constante entera: " 
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "li $a0, " + str(token.token.lexeme) + "\n"
             primerOperando = False
          else:
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para una constante entera: " 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para una constante entera: " 
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
             codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
             codigoGenerado = codigoGenerado + "li $a0, " + str(token.token.lexeme) + "\n"
       elif token.token.type in variables:
          if primerOperando == True:
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para leer la variable: " 
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
             primerOperando = False
          else:
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para leer la variable: " 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para leer la variable: " 
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
             codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
@@ -656,41 +657,107 @@ def expresionPolacaAssembly(expresionPolaca):
 
       elif token.token.type in operadores:
          if token.token.type == 'SUMA':
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para sumar: \n" 
-            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para sumar: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "add $a0, $a0, $t1\n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
          
          if token.token.type == 'RESTA':
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para restar: \n" 
-            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para restar: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "sub $a0, $t1, $a0 \n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
 
          if token.token.type == 'MULTIPLICACION':
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para multiplicar: \n" 
-            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para multiplicar: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "mul $a0, $t1, $a0 \n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
 
          if token.token.type == 'DIVISION':
-            codigoGenerado = codigoGenerado + "\n#Codigo generado para dividir: \n" 
-            codigoGenerado = codigoGenerado + "\n#Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para dividir: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "div $a0, $t1, $a0 \n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
          
 print()
 print()
-print()
-print()
 
+def genExpresionAssembly(node):
+   global codigoGenerado 
+   codigoGenerado = codigoGenerado + "\n# **************************************************\n"
+   codigoGenerado = codigoGenerado + "# Generando codigo para la expresion: " + str(node.node.id)
+   codigoGenerado = codigoGenerado + "\n# **************************************************\n"
+   global expresionFormula
+   expresionFormula = []
+   recorrerExpresion( node )
+   printExpresionFormula(expresionFormula)
+   print()
+   global expresionPolaca
+   global pilaOperadores
+   pilaOperadores = []
+   expresionPolaca = []
+   convertirNotacionPolaca( expresionFormula )
+   printExpresionFormula(expresionPolaca)
+   print("____________________________________________________")
+   expresionPolacaAssembly( expresionPolaca )   
+
+
+print()
+print()
 
 codigoGenerado = codigoGenerado + ".text \nmain:\n"
 
-expresionPolacaAssembly(expresionPolaca)
+#expresionPolacaAssembly(expresionPolaca)
+
+#genExpresionAssembly( buscarNodeTree(43, root) )
+# tree.children[2].children[0].node.token.lexeme
+# tree.children[2].children[0].node.token.type
+# node type es declaracion
+def genDeclaracionAssembly(node):
+   global codigoGenerado 
+
+   print( node.children[0].children[0].node.token.type )
+   
+   if node.children[0].children[0].node.token.type == "asignacion":
+      # Generar codigo para la expresion de la asignacion
+      genExpresionAssembly(node.children[0].children[0].children[1])
+      # Asignar el resultado a la variable
+      codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una declaracion:\n" 
+      codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[1].node.token.lexeme + "\n"   
+      codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+
+   if node.children[0].node.token.type == "creacion_variable":
+      # Generar codigo para la expresion de la asignacion
+      genExpresionAssembly(node.children[0].children[0].children[1])
+      # Asignar el resultado a la variable
+      codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una creacion de variable:\n" 
+      codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[0].children[1].node.token.lexeme + "\n"   
+      codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+   ##############################################################################################
+   # Se evaluara la expresion: verdadero: cualquier numero ||| falso: 0
+   # Ejemplo: 3 > 5 resultado 0, 3 + 1 == 1
+   ##############################################################################################
+   if node.children[0].children[0].node.token.type == "si":
+      codigoGenerado = codigoGenerado + "\n# Codigo generado para la estructura de control si\n"
+
+   
+   '''
+   if node.token.type == "creacion_variable":
+      codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion de la variable: " 
+   codigoGenerado = codigoGenerado + + "\n" 
+   codigoGenerado = codigoGenerado + "la $t1, var_" + '' + "\n"
+   codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+   '''
+   
+genDeclaracionAssembly(buscarNodeTree(60, root))
+
+
+
+codigoGenerado = codigoGenerado + "\njr $ra\n"
 
 print(codigoGenerado)
