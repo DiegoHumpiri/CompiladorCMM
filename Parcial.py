@@ -547,9 +547,15 @@ def reservarMemoriaVariables( tree ):
 
 reservarMemoriaVariables( root )
 
-terminales = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
-    'NUMERO_DECIMAL', 'PARENTESIS_DER', 'PARENTESIS_IZQ', 'LLAVES_DER', 'IDENTIFICADOR',
-    'LITERAL_CADENA', 'LITERAL_CARACTER', 'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', }
+terminales = { 
+               'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 
+               'VERDADERO', 'FALSO', 'NUMERO_ENTERO', 'NUMERO_DECIMAL', 
+               'PARENTESIS_DER', 'PARENTESIS_IZQ', 'LLAVES_DER', 'IDENTIFICADOR',
+               'LITERAL_CADENA', 'LITERAL_CARACTER', 
+               'SUMA', 'RESTA', 'MULTIPLICACION', 'DIVISION', 
+               'MENOR_QUE', 'MENOR_IGUAL_QUE', 'MAYOR_QUE', 'MAYOR_IGUAL_QUE',
+               'IGUAL', 'DIFERENTE',
+             }
 
 expresionFormula = []
 
@@ -573,11 +579,24 @@ def printExpresionFormula( expresion ):
 
 #printExpresionFormula(expresionFormula)
 
-operando = { 'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
-             'NUMERO_DECIMAL', 'IDENTIFICADOR', 'LITERAL_CADENA', 'LITERAL_CARACTER' }
-operadores = { 'MULTIPLICACION', 'DIVISION', 'SUMA', 'RESTA', 'PARENTESIS_DER', 'PARENTESIS_IZQ' }
-operadoresPrecedencia = [ ('MULTIPLICACION',3), ('DIVISION',3), ('SUMA',2), ('RESTA',2), 
-                          ('PARENTESIS_IZQ',1), ('PARENTESIS_DER',1) ]
+operando = { 
+             'ENTERO', 'DECIMAL', 'CARACTER', 'CADENA', 'VERDADERO', 'FALSO', 'NUMERO_ENTERO',
+             'NUMERO_DECIMAL', 'IDENTIFICADOR', 'LITERAL_CADENA', 'LITERAL_CARACTER' 
+           }
+operadores = { 
+               'MULTIPLICACION', 'DIVISION', 'SUMA', 'RESTA', 
+               'MENOR_QUE', 'MENOR_IGUAL_QUE', 'MAYOR_QUE', 'MAYOR_IGUAL_QUE',
+               'IGUAL', 'DIFERENTE',
+               'PARENTESIS_DER', 'PARENTESIS_IZQ' 
+             }
+operadoresPrecedencia = [ 
+                          ('MULTIPLICACION', 5), ('DIVISION', 5), 
+                          ('SUMA', 4), ('RESTA', 4), 
+                          ('MENOR_QUE', 3), ('MENOR_IGUAL_QUE', 3), 
+                          ('MAYOR_QUE', 3), ('MAYOR_IGUAL_QUE', 3),
+                          ('IGUAL', 2), ('DIFERENTE', 2),
+                          ('PARENTESIS_IZQ',1), ('PARENTESIS_DER',1) 
+                        ]
 
 pilaOperadores = []
 expresionPolaca = []
@@ -683,6 +702,82 @@ def expresionPolacaAssembly(expresionPolaca):
             codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
             codigoGenerado = codigoGenerado + "div $a0, $t1, $a0 \n"
             codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'MENOR_QUE':
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar menor_que: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "slt $a0, $t1, $a0 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'MENOR_IGUAL_QUE': # a < b
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar menor_igual_que: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "move $t2, $a0 \n"
+            # a < b  ---> or
+            codigoGenerado = codigoGenerado + "slt $t3, $t1, $t2 \n"
+            # b < a  ---> not --> or
+            codigoGenerado = codigoGenerado + "slt $t4, $t2, $t1 \n"
+            # not
+            codigoGenerado = codigoGenerado + "not $t4, $t4 \n"
+            # or
+            codigoGenerado = codigoGenerado + "or $a0, $t3, $t4 \n"
+            codigoGenerado = codigoGenerado + "add $a0, $a0, 2 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'MAYOR_QUE':
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar mayor_que: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "slt $a0, $a0, $t1 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+         
+         if token.token.type == 'MAYOR_IGUAL_QUE':
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar mayor_igual_que: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "move $t2, $a0 \n"
+            # a < b  ---> or
+            codigoGenerado = codigoGenerado + "slt $t3, $t2, $t1 \n"
+            # b < a  ---> not --> or
+            codigoGenerado = codigoGenerado + "slt $t4, $t1, $t2 \n"
+            # not
+            codigoGenerado = codigoGenerado + "not $t4, $t4 \n"
+            # or
+            codigoGenerado = codigoGenerado + "or $a0, $t3, $t4 \n"
+            codigoGenerado = codigoGenerado + "add $a0, $a0, 2 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'IGUAL':
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar igual: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "move $t2, $a0 \n"
+            # a < b  ---> or
+            codigoGenerado = codigoGenerado + "slt $t3, $t2, $t1 \n"
+            # b < a  ---> or
+            codigoGenerado = codigoGenerado + "slt $t4, $t1, $t2 \n"
+            # or
+            codigoGenerado = codigoGenerado + "or $a0, $t3, $t4 \n"
+            # not
+            codigoGenerado = codigoGenerado + "not $a0, $a0 \n"
+            codigoGenerado = codigoGenerado + "add $a0, $a0, 2 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
+         if token.token.type == 'DIFERENTE':
+            codigoGenerado = codigoGenerado + "\n# Codigo generado para comparar diferente: \n" 
+            codigoGenerado = codigoGenerado + "\n# Cargar de la pila en $t1: \n" 
+            codigoGenerado = codigoGenerado + "lw $t1, 4($sp)\n"
+            codigoGenerado = codigoGenerado + "move $t2, $a0 \n"
+            # a < b  ---> or
+            codigoGenerado = codigoGenerado + "slt $t3, $t2, $t1 \n"
+            # b < a  ---> or
+            codigoGenerado = codigoGenerado + "slt $t4, $t1, $t2 \n"
+            # or
+            codigoGenerado = codigoGenerado + "or $a0, $t3, $t4 \n"
+            codigoGenerado = codigoGenerado + "add $sp $sp 4\t# Hacemos pop\n"
+
          
 print()
 print()
@@ -720,8 +815,6 @@ codigoGenerado = codigoGenerado + ".text \nmain:\n"
 # node type es declaracion
 def genDeclaracionAssembly(node):
    global codigoGenerado 
-
-   print( node.children[0].children[0].node.token.type )
    
    if node.children[0].children[0].node.token.type == "asignacion":
       # Generar codigo para la expresion de la asignacion
@@ -738,8 +831,9 @@ def genDeclaracionAssembly(node):
       codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una creacion de variable:\n" 
       codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[0].children[1].node.token.lexeme + "\n"   
       codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+
    ##############################################################################################
-   # Se evaluara la expresion: verdadero: cualquier numero ||| falso: 0
+   # Se evaluara la expresion en si( expresion ): verdadero: 1 ||| falso: 0
    # Ejemplo: 3 > 5 resultado 0, 3 + 1 == 1
    ##############################################################################################
    if node.children[0].children[0].node.token.type == "si":
@@ -754,10 +848,11 @@ def genDeclaracionAssembly(node):
    codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
    '''
    
-genDeclaracionAssembly(buscarNodeTree(60, root))
+genDeclaracionAssembly(buscarNodeTree(21, root))
 
 
-
+codigoGenerado = codigoGenerado + "\nli $v0, 1\n"
+codigoGenerado = codigoGenerado + "syscall\n"
 codigoGenerado = codigoGenerado + "\njr $ra\n"
 
 print(codigoGenerado)

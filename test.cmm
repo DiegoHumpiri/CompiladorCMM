@@ -1,6 +1,4 @@
 funcion vacio principal() {
     entero x;
-    x = 5;
-    entero y = 2 + 1;
-    x = 1 + ( 2 + x ) * y;
+    x = 12 == 12;
 }
