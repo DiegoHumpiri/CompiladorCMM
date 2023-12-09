@@ -1,3 +1,5 @@
-# Analizador_Semantico
+# Compilador C--
 
-Analizador Semántico del lenguaje C--
+Compilador del lenguaje C--
+
+Generador de codigo assembly MIPS
