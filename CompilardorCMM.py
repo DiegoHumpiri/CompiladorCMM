@@ -157,8 +157,13 @@ def imprimirTokens( listaTokens ):
 
 inputTokens = []
 
-with open('test.cmm', mode='r') as fileSource:
+########################################################################################
+##########  Lectura del archivo
+########################################################################################
 #with open('test.cmm', mode='r') as fileSource:
+with open('operaciones_aritmeticas.cmm', mode='r') as fileSource:
+#with open('estructuras_si', mode='r') as fileSource:
+#with open('funciones.cmm', mode='r') as fileSource:
     fileStr = fileSource.read()
     inputTokens = tokenizar(fileStr)
 
@@ -992,7 +997,7 @@ def genBloqueDeclaracionesAssembly( node, scope ):
       temp = temp.children[0]
 
 #recorrerDeclaraciones( buscarNodeTree( 5, root ) )
-genBloqueDeclaracionesAssembly( buscarNodeTree( 5, root ), "" )
+#genBloqueDeclaracionesAssembly( buscarNodeTree( 5, root ), "" )
 
 
 def genCodigoFuncion(node):
@@ -1062,9 +1067,16 @@ def buscarFuncion( tree, nombre ):
       temp = temp.children[0]
    return 
 
+def generarCodigo( tree ):
+   genBloqueDeclaracionesAssembly( buscarNodeTree( 5, tree ), "" )
+   return
+
+generarCodigo( root )
+
 codigoGenerado = codigoGenerado + "\n\nli $v0, 1\n"
 codigoGenerado = codigoGenerado + "syscall\n"
 codigoGenerado = codigoGenerado + "\njr $ra\n"
+
 
 #genCodigoFuncion( buscarNodeTree( 31, root) )
 
@@ -1073,4 +1085,7 @@ codigoGenerado = codigoGenerado + "\njr $ra\n"
 
 #print ( contarParametros(buscarNodeTree( 88, root) ) )
 
-#print(codigoGenerado)
+if( len(stack) == 0 ):
+   text_file = open("salida.s", "w")
+   text_file.write( codigoGenerado )
+   text_file.close()

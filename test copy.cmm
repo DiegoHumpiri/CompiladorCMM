@@ -1,8 +1,0 @@
-funcion vacio principal() {
-    entero x;
-    entero y;
-    entero z = 1;
-
-    x = 5;
-    y = x + 5;
-}

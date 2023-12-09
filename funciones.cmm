@@ -1,12 +1,7 @@
 funcion vacio principal() {
-    si(a > 4) {
-        a = 1 + a;
-        a = a + 1;
-    } 
-    a = verdadero;
-    sino {
-        mientras(verdadero) {
-            decimal dec = 100;
-        }
-    }
+    entero y = 1;
+} 
+funcion entero fun() {
+    entero x = 4;
+    retornar x;
 }

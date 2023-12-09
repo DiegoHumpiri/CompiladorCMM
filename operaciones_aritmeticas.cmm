@@ -1,5 +1,6 @@
 funcion vacio principal() {
-    si( verdadero ){
-        imprimir("hola");
-    }
+    entero y = 2 * 4 - 1 * ( 6 / 2 );
+    entero x;
+    x = 4;
+    entero operacion = 2 * ( y + 1 ) - 20 / x;
 }
