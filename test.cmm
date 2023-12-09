@@ -1,4 +1,10 @@
 funcion vacio principal() {
-    entero x;
-    x = 12 == 12;
+    
+    entero x = 9;
+    x = fun();
+}
+
+funcion entero fun() {
+    entero fu = 2;
+    retornar fu;
 }

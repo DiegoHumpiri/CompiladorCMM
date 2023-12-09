@@ -528,21 +528,80 @@ def buscarNodeTree(id, tree):
       return temp
   return None
 '''
-codigoGenerado = "# Codigo ensamblador:\n .data \n"
+codigoGenerado = "# Codigo ensamblador:\n.data \n"
 
+def contarParametros(node):
+   parametros_n = 0;
+   temp = node
+   while temp.children[0].node.token.type != 'e':
+      parametros_n = parametros_n + 1
+      temp = temp.children[0]
+
+   return parametros_n
+
+ambito = ""
 def reservarMemoriaVariables( tree ):
-    if tree.node.token.type == "creacion_variable":
-       if tree.children[2].children[0].node.token.type == "ENTERO":
-         global codigoGenerado
+   global ambito
+   global codigoGenerado
+   #print( str( tree.node.id ) + " " + tree.node.token.type )
+   if(tree.node.token.type == "funcion"):
+       ambito = tree.children[9].node.token.lexeme
+       # Reservar memoria para los parametros de la funcion
+       temp = tree.children[7]
+       while temp.children[0].node.token.type != 'e':
+         if temp.children[1].children[1].children[0].node.token.type == "ENTERO":
+            codigoGenerado = codigoGenerado + "# Creacion de variable parametro "
+            codigoGenerado = codigoGenerado + temp.children[1].children[1].children[0].node.token.lexeme
+            codigoGenerado = codigoGenerado + " " + temp.children[1].children[0].node.token.lexeme         
+            codigoGenerado = codigoGenerado + " de la funcion " + ambito
+
+            codigoGenerado = codigoGenerado + "\nvar_" + ambito + "_" + temp.children[1].children[0].node.token.lexeme
+            codigoGenerado = codigoGenerado + ":\t\t.word\t0:1\n"   
+      
+         temp = temp.children[0]
+
+       
+   if tree.node.token.type == "creacion_variable":
+      if tree.children[2].children[0].node.token.type == "ENTERO":
          codigoGenerado = codigoGenerado + "# Creacion de variable "
          codigoGenerado = codigoGenerado + tree.children[2].children[0].node.token.lexeme
          codigoGenerado = codigoGenerado + " " + tree.children[1].node.token.lexeme
-         codigoGenerado = codigoGenerado + "\nvar_" + tree.children[1].node.token.lexeme
+         if ambito == "":
+            codigoGenerado = codigoGenerado + "\nvar_" + tree.children[1].node.token.lexeme
+         else:
+            codigoGenerado = codigoGenerado + " en funcion " + ambito
+            codigoGenerado = codigoGenerado + "\nvar_" + ambito + "_" + tree.children[1].node.token.lexeme
          codigoGenerado = codigoGenerado + ":\t\t.word\t0:1\n"
+   
+   for child in reversed(tree.children):
+      reservarMemoriaVariables(child)
+
+def reservarMemoriaVariables1( tree ):
+    global ambito
+    global codigoGenerado
+ 
+    if(tree.node.token.type == "funcion"):
+       ambito = tree.children[9].node.token.lexeme
+    if(tree.node.token.type == "programa"):
+       ambito = ""
+    
     for child in tree.children:
        temp = reservarMemoriaVariables( child )
        if temp != None:
           return temp
+
+    if tree.node.token.type == "creacion_variable":
+       if tree.children[2].children[0].node.token.type == "ENTERO":
+         
+         codigoGenerado = codigoGenerado + "# Creacion de variable "
+         codigoGenerado = codigoGenerado + tree.children[2].children[0].node.token.lexeme
+         codigoGenerado = codigoGenerado + " " + tree.children[1].node.token.lexeme
+         if ambito == "programa":
+            codigoGenerado = codigoGenerado + "\nvar_" + tree.children[1].node.token.lexeme
+         else:
+            codigoGenerado = codigoGenerado + "\nvar_" + ambito + "_" + tree.children[1].node.token.lexeme
+         codigoGenerado = codigoGenerado + ":\t\t.word\t0:1\n"
+    
     return None
 
 reservarMemoriaVariables( root )
@@ -638,7 +697,7 @@ print()
 constantes = { 'NUMERO_ENTERO' }
 variables = { 'IDENTIFICADOR' }
 
-def expresionPolacaAssembly(expresionPolaca):
+def expresionPolacaAssembly(expresionPolaca, scope):
    global constantes
    global variables
    global operadores
@@ -663,7 +722,10 @@ def expresionPolacaAssembly(expresionPolaca):
          if primerOperando == True:
             codigoGenerado = codigoGenerado + "\n# Codigo generado para leer la variable: " 
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
-            codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            if scope == "":
+               codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            else:
+               codigoGenerado = codigoGenerado + "la $t0, var_" + scope + "_" + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
             primerOperando = False
          else:
@@ -671,7 +733,10 @@ def expresionPolacaAssembly(expresionPolaca):
             codigoGenerado = codigoGenerado + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "sw $a0 0($sp)\n"
             codigoGenerado = codigoGenerado + "add $sp $sp -4\t# Hacemos push\n"
-            codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            if scope == "":
+               codigoGenerado = codigoGenerado + "la $t0, var_" + str(token.token.lexeme) + "\n"
+            else:
+               codigoGenerado = codigoGenerado + "la $t0, var_" + scope + "_" + str(token.token.lexeme) + "\n"
             codigoGenerado = codigoGenerado + "lw $a0 0($t0)\n"
 
       elif token.token.type in operadores:
@@ -782,7 +847,7 @@ def expresionPolacaAssembly(expresionPolaca):
 print()
 print()
 
-def genExpresionAssembly(node):
+def genExpresionAssembly(node, scope):
    global codigoGenerado 
    codigoGenerado = codigoGenerado + "\n# **************************************************\n"
    codigoGenerado = codigoGenerado + "# Generando codigo para la expresion: " + str(node.node.id)
@@ -799,7 +864,7 @@ def genExpresionAssembly(node):
    convertirNotacionPolaca( expresionFormula )
    printExpresionFormula(expresionPolaca)
    print("____________________________________________________")
-   expresionPolacaAssembly( expresionPolaca )   
+   expresionPolacaAssembly( expresionPolaca, scope )   
 
 
 print()
@@ -813,17 +878,11 @@ codigoGenerado = codigoGenerado + ".text \nmain:\n"
 # tree.children[2].children[0].node.token.lexeme
 # tree.children[2].children[0].node.token.type
 # node type es declaracion
-def genDeclaracionAssembly(node):
+def genDeclaracionAssembly(node, scope):
    global codigoGenerado 
-   
-   if node.children[0].children[0].node.token.type == "asignacion":
-      # Generar codigo para la expresion de la asignacion
-      genExpresionAssembly(node.children[0].children[0].children[1])
-      # Asignar el resultado a la variable
-      codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una declaracion:\n" 
-      codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[1].node.token.lexeme + "\n"   
-      codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
 
+   # Creacion de variable sin asignacion
+   '''
    if node.children[0].node.token.type == "creacion_variable":
       # Generar codigo para la expresion de la asignacion
       genExpresionAssembly(node.children[0].children[0].children[1])
@@ -831,14 +890,75 @@ def genDeclaracionAssembly(node):
       codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una creacion de variable:\n" 
       codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[0].children[1].node.token.lexeme + "\n"   
       codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+      return
+   '''
+
+   # Creacion de variable con asignacion
+   if node.children[0].node.token.type == "creacion_variable":
+      # Generar codigo para la expresion de la asignacion
+
+      if len( node.children[0].children[0].children ) == 1:
+         # No se realiza ninguna operacion
+         return
+      else:
+         genExpresionAssembly(node.children[0].children[0].children[1], scope)
+         # Asignar el resultado a la variable
+               
+         codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una creacion de variable:\n" 
+         if scope == "":
+            codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[0].children[1].node.token.lexeme + "\n"   
+         else:
+            codigoGenerado = codigoGenerado + "la $t1, var_" + scope + "_" + node.children[0].children[1].node.token.lexeme + "\n"   
+         codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+         return
+   
+   if node.children[0].children[0].node.token.type == "asignacion":
+      # Generar codigo para la expresion de la asignacion
+      genExpresionAssembly(node.children[0].children[0].children[1], scope)
+      # Asignar el resultado a la variable
+      codigoGenerado = codigoGenerado + "\n# Codigo generado para la asignacion en una declaracion:\n"   
+      if scope == "":
+         codigoGenerado = codigoGenerado + "la $t1, var_" + node.children[1].node.token.lexeme + "\n"   
+      else:
+         codigoGenerado = codigoGenerado + "la $t1, var_" + scope + "_" + node.children[1].node.token.lexeme + "\n"   
+      codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
+      return
 
    ##############################################################################################
    # Se evaluara la expresion en si( expresion ): verdadero: 1 ||| falso: 0
-   # Ejemplo: 3 > 5 resultado 0, 3 + 1 == 1
+   # Ejemplo: 3 > 5 resultado 0, 3 + 1 == 4 resultado 1
    ##############################################################################################
    if node.children[0].children[0].node.token.type == "si":
-      codigoGenerado = codigoGenerado + "\n# Codigo generado para la estructura de control si\n"
+      codigoGenerado = codigoGenerado + "\n############################################################"
+      codigoGenerado = codigoGenerado + "\n# Generar codigo para la estructura de control si, sino     "
+      codigoGenerado = codigoGenerado + "\n############################################################\n"
+      print(node.children[0].children[0].children[5].node.token.type)
+      genExpresionAssembly(node.children[0].children[0].children[5], scope)
+      
+      codigoGenerado = codigoGenerado + "# Comparacion: si la expresion es 0 (falso) o verdadero (1)\n"
+      codigoGenerado = codigoGenerado + "beqz $a0, LABEL_SI_FALSO_"
+      codigoGenerado = codigoGenerado + str(node.children[0].children[0].node.id)
+      codigoGenerado = codigoGenerado + " # Si ( $a0 == 0 )\n"
 
+      codigoGenerado = codigoGenerado + "LABEL_SI_VERDADERO:  # Si $a0 == 1\n"
+
+      codigoGenerado = codigoGenerado + "# Codigo generado para las declaraciones del si\n"
+      genBloqueDeclaracionesAssembly( node.children[0].children[0].children[2], scope)
+      
+      codigoGenerado = codigoGenerado + "\nb LABEL_END_SI_" + str(node.children[0].children[0].node.id) + "\n\n"
+
+      codigoGenerado = codigoGenerado + "LABEL_SI_FALSO_" + str(node.children[0].children[0].node.id) + ": "
+      codigoGenerado = codigoGenerado + " # Si $a0 == 0\n"
+
+      #codigoGenerado = codigoGenerado + "li $a0 20\n\n" ########## - Replace - ########################
+      codigoGenerado = codigoGenerado + "# Codigo generado para las declaraciones del sino si las hay\n"
+      if len( node.children[0].children[0].children[0].children ) > 1:
+         genBloqueDeclaracionesAssembly( node.children[0].children[0].children[0].children[1], scope )
+
+      codigoGenerado = codigoGenerado + "LABEL_END_SI_" + str(node.children[0].children[0].node.id) + ":\n"
+
+      codigoGenerado = codigoGenerado + "\n################### FIN SI SINO #############################\n\n"
+      return
    
    '''
    if node.token.type == "creacion_variable":
@@ -848,11 +968,109 @@ def genDeclaracionAssembly(node):
    codigoGenerado = codigoGenerado + "sw $a0, 0($t1) \n"
    '''
    
-genDeclaracionAssembly(buscarNodeTree(21, root))
+#genDeclaracionAssembly(buscarNodeTree(21, root))
+
+def recorrerDeclaraciones(node): # node.type declaraciones
+   temp = node
+   while  temp.children[0].node.token.type != 'e':
+      #genDeclaracionAssembly( temp.children[1] )
+      print( str(temp.children[0].node.id ) + " - " + temp.children[0].node.token.type )
+      print( str(temp.children[1].node.id ) + " - " + temp.children[1].node.token.type )
+      temp = temp.children[0]
+   return
+
+def genBloqueDeclaracionesAssembly( node, scope ):
+   global codigoGenerado
+   temp = node
+   while  temp.children[0].node.token.type != 'e':
+      codigoGenerado = codigoGenerado + "\n# Codigo para la declaracion " 
+      codigoGenerado = codigoGenerado + str( temp.children[1].node.id ) + "\n" 
+      genDeclaracionAssembly( temp.children[1], scope )
+      codigoGenerado = codigoGenerado + "\n# ________________________________________________________\n" 
+      #print( str(temp.children[0].node.id ) + " - " + temp.children[0].node.token.type )
+      #print( str(temp.children[1].node.id ) + " - " + temp.children[1].node.token.type )
+      temp = temp.children[0]
+
+#recorrerDeclaraciones( buscarNodeTree( 5, root ) )
+genBloqueDeclaracionesAssembly( buscarNodeTree( 5, root ), "" )
 
 
-codigoGenerado = codigoGenerado + "\nli $v0, 1\n"
+def genCodigoFuncion(node):
+   global codigoGenerado
+   scope_funcion = node.children[9].node.token.lexeme
+   codigoGenerado = codigoGenerado + "\n############################################################"
+   codigoGenerado = codigoGenerado + "\n# Generar codigo para la funcion   "
+   codigoGenerado = codigoGenerado + "\n############################################################\n"
+   
+   codigoGenerado = codigoGenerado + node.children[9].node.token.lexeme + ":\n"
+   codigoGenerado = codigoGenerado + "move $fp $sp\n"
+   codigoGenerado = codigoGenerado + "sw $ra 0($sp)\n"
+   codigoGenerado = codigoGenerado + "addiu $sp $sp -4 # Push\n"
+
+   codigoGenerado = codigoGenerado + "### Declaraciones de la funcion\n"
+
+   genBloqueDeclaracionesAssembly( node.children[4], scope_funcion )
+
+   codigoGenerado = codigoGenerado + "### Fin de declaraciones\n"
+
+   codigoGenerado = codigoGenerado + "### Evaluar el return\n"
+   genExpresionAssembly( node.children[2].children[0], scope_funcion )
+
+   codigoGenerado = codigoGenerado + "\nlw $ra 4($sp)\n"
+   codigoGenerado = codigoGenerado + "addiu $sp $sp 8\n"
+   codigoGenerado = codigoGenerado + "lw $fp 0($sp)\n"
+   codigoGenerado = codigoGenerado + "jr $ra\n"
+   '''
+   parametros_c = contarParametros( node.children[7] )
+   print(parametros_c)
+   
+   if parametros_c == 0 :
+      codigoGenerado = codigoGenerado + "\nLa funcion no tiene parametros\n"
+   if parametros_c == 1:
+      codigoGenerado = codigoGenerado + "lw $a0, 8($sp)\n"
+      codigoGenerado = codigoGenerado + "sw $a0, 0($sp)\n"
+      codigoGenerado = codigoGenerado + "addiu $sp $sp -4 # Push\n"
+   '''
+   return
+
+def genCodigoLlamadaFuncion(  ):
+   # Asignar los valores de los argumentos a las variables parametros
+   codigoGenerado = codigoGenerado + "\n#############################################"
+   codigoGenerado = codigoGenerado + "\n# Codigo generado de llamada a funcion "
+   codigoGenerado = codigoGenerado + "\n#############################################\n"
+   codigoGenerado = codigoGenerado + "sw $fp 0($sp)\n"
+   codigoGenerado = codigoGenerado + "addiu $sp $sp -4\n"
+   codigoGenerado = codigoGenerado + "# Generar codigo para los argumentos \n"
+   ### Buscar funcion
+   #nodo_funcion = 
+   codigoGenerado = codigoGenerado + ""
+   codigoGenerado = codigoGenerado + ""
+   codigoGenerado = codigoGenerado + ""
+
+   return
+
+def buscarFuncion( tree, nombre ):
+   temp = tree
+   while temp.children[0].children[0].node.token.type != 'e':
+      #genDeclaracionAssembly( temp.children[1] )
+      print( str(temp.children[0].node.id ) + " -- " + temp.children[0].node.token.type )
+      print( str(temp.children[0].children[1].node.id ) + " -- " + temp.children[0].children[1].node.token.type )
+      print( str(temp.children[0].children[1].children[9].node.id ) + " -- " + temp.children[0].children[1].children[9].node.token.lexeme )
+      if nombre == temp.children[0].children[1].children[9].node.token.lexeme:
+         return temp.children[0].children[1]
+
+      temp = temp.children[0]
+   return 
+
+codigoGenerado = codigoGenerado + "\n\nli $v0, 1\n"
 codigoGenerado = codigoGenerado + "syscall\n"
 codigoGenerado = codigoGenerado + "\njr $ra\n"
 
-print(codigoGenerado)
+#genCodigoFuncion( buscarNodeTree( 31, root) )
+
+#func = buscarFuncion( root, "fun" )
+#print( str( func.node.id )  + " " + func.node.token.type )
+
+#print ( contarParametros(buscarNodeTree( 88, root) ) )
+
+#print(codigoGenerado)
