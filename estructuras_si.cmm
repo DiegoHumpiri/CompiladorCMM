@@ -6,6 +6,6 @@ funcion vacio principal() {
         a = a + 20;
     }
     si( a >= 20 ) {
-        a = 1;
+        a = 3;
     }
 }

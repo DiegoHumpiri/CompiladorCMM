@@ -162,7 +162,7 @@ inputTokens = []
 ########################################################################################
 #with open('test.cmm', mode='r') as fileSource:
 with open('operaciones_aritmeticas.cmm', mode='r') as fileSource:
-#with open('estructuras_si', mode='r') as fileSource:
+#with open('estructuras_si.cmm', mode='r') as fileSource:
 #with open('funciones.cmm', mode='r') as fileSource:
     fileStr = fileSource.read()
     inputTokens = tokenizar(fileStr)
@@ -1073,12 +1073,14 @@ def generarCodigo( tree ):
 
 generarCodigo( root )
 
+#genCodigoFuncion( buscarNodeTree( 31, root) )
+
 codigoGenerado = codigoGenerado + "\n\nli $v0, 1\n"
 codigoGenerado = codigoGenerado + "syscall\n"
 codigoGenerado = codigoGenerado + "\njr $ra\n"
 
+#print(codigoGenerado)
 
-#genCodigoFuncion( buscarNodeTree( 31, root) )
 
 #func = buscarFuncion( root, "fun" )
 #print( str( func.node.id )  + " " + func.node.token.type )
