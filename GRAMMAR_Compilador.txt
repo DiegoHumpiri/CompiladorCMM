@@ -1,0 +1,86 @@
+programa               -> FUNCION VACIO PRINCIPAL PARENTESIS_IZQ PARENTESIS_DER LLAVES_IZQ declaraciones LLAVES_DER funciones_adicionales
+funciones_adicionales  -> ''
+funciones_adicionales  -> funcion funciones_adicionales_
+funciones_adicionales_ -> funcion funciones_adicionales_
+funciones_adicionales_ -> ''
+funcion                -> FUNCION tipo IDENTIFICADOR PARENTESIS_IZQ parametros PARENTESIS_DER LLAVES_IZQ declaraciones RETORNAR retorno FIN_SENTENCIA LLAVES_DER
+retorno                -> expresion
+retorno                -> ''
+parametros            -> parametro parametros_
+parametros            -> ''
+parametros_           -> COMA parametro parametros_
+parametros_           -> ''
+parametro             -> tipo IDENTIFICADOR
+
+declaraciones         -> declaracion declaraciones_
+declaraciones_        -> declaracion declaraciones_
+declaraciones_        -> ''
+declaracion           -> creacion_variable
+declaracion           -> IDENTIFICADOR declaracion_
+
+declaracion_          -> asignacion
+declaracion_          -> llamada_funcion
+llamada_funcion       -> PARENTESIS_IZQ argumentos PARENTESIS_DER FIN_SENTENCIA
+
+creacion_variable     -> tipo IDENTIFICADOR creacion_variable_
+creacion_variable_    -> FIN_SENTENCIA
+creacion_variable_    -> ASIGNACION expresion FIN_SENTENCIA
+asignacion            -> ASIGNACION expresion FIN_SENTENCIA
+
+tipo                  -> ENTERO
+tipo                  -> DECIMAL
+tipo                  -> CARACTER
+tipo                  -> CADENA
+tipo                  -> VACIO
+tipo                  -> BOLEANO
+
+declaracion           -> estructura_control
+estructura_control    -> si
+si                    -> SI PARENTESIS_IZQ expresion PARENTESIS_DER LLAVES_IZQ declaraciones LLAVES_DER sino
+sino                  -> SINO LLAVES_IZQ declaraciones LLAVES_DER
+sino                  -> ''
+
+estructura_control    -> mientras
+mientras              -> MIENTRAS PARENTESIS_IZQ expresion PARENTESIS_DER LLAVES_IZQ declaraciones LLAVES_DER
+
+estructura_control    -> para
+para                  -> PARA PARENTESIS_IZQ asignacion_para FIN_SENTENCIA expresion FIN_SENTENCIA asignacion_para PARENTESIS_DER LLAVES_IZQ declaraciones LLAVES_DER
+asignacion_para       -> IDENTIFICADOR ASIGNACION expresion
+asignacion_para       -> tipo IDENTIFICADOR ASIGNACION expresion 
+asignacion_para       -> ''
+
+expresion -> termino expresion_
+expresion_ -> SUMA termino expresion_
+expresion_ -> RESTA termino expresion_
+expresion_ -> ''
+termino -> factor termino_
+termino_ -> MULTIPLICACION factor termino_
+termino_ -> DIVISION factor termino_
+termino_ -> ''
+
+termino_ -> IGUAL factor termino_
+termino_ -> DIFERENTE factor termino_
+termino_ -> MENOR_QUE factor termino_
+termino_ -> MENOR_IGUAL_QUE factor termino_
+termino_ -> MAYOR_QUE factor termino_
+termino_ -> MAYOR_IGUAL_QUE factor termino_
+termino_ -> DISYUNCION factor termino_
+termino_ -> CONJUNCION factor termino_
+
+factor -> NEGACION factor 
+factor -> NUMERO_ENTERO
+factor -> NUMERO_DECIMAL
+factor -> LITERAL_CADENA
+factor -> LITERAL_CARACTER
+factor -> VERDADERO
+factor -> FALSO
+factor -> PARENTESIS_IZQ expresion PARENTESIS_DER
+factor -> IDENTIFICADOR factor_funcion 
+factor_funcion -> ''
+factor_funcion -> PARENTESIS_IZQ argumentos PARENTESIS_DER
+
+argumentos            -> argumento argumentos_
+argumentos            -> ''
+argumentos_           -> COMA argumento argumentos_
+argumentos_           -> ''
+argumento             -> expresion
